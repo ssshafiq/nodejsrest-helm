@@ -1,0 +1,68 @@
+# Default values for hl-fabric.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+persistence:
+  # By default we must set this to false to enable chart to pass tests
+  # However, in a proper deployment, you should set this to "true", so that the different components can share data
+  enabled: true
+  annotations: {}
+  size: 20Gi
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClassName: ""
+  accessMode: ReadWriteMany
+
+
+rest:
+  image:
+    repository: saadbutt/nodejs-fabric
+    tag: 0.0.1
+    pullPolicy: IfNotPresent
+
+  service:
+    # Cluster IP or LoadBalancer
+    type: NodePort
+    port: 4000
+
+  # Ingress for fabric REST
+  ingress:
+    enabled: false
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # certmanager.k8s.io/cluster-issuer: "letsencrypt-staging"
+    path: /
+    hosts: []
+    #  - hl-fabric-rest.local
+    tls: []
+    #  - secretName: hl-fabric-rest-tls
+    #    hosts:
+    #      - hl-fabric-rest.local
+
+  config:
+    # fabric REST server API key
+    # apiKey:
+    # Card for network connection
+    fabricRestServerCard: MTBCadmin@med-net
+
+  resources: 
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    #limits:
+    # cpu: 100m
+    # memory: 128Mi
+    #requests:
+    # cpu: 100m
+    # memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}

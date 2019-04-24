@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "hl-fabric.fullname" $ }}-rest
+  labels:
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  type: {{ .Values.rest.service.type }}
+  ports:
+    - port: {{ .Values.rest.service.port }}
+      targetPort: 4000
+      nodePort: 30090
+      protocol: TCP
+      name: http
+  selector:
+    name: {{ include "hl-fabric.fullname" . }}-rest
+    app: {{ include "hl-fabric.name" . }}
+    release: {{ .Release.Name }}
+
+---

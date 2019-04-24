@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "hl-fabric.fullname" . }}-rest
+  labels:
+    name: {{ include "hl-fabric.fullname" . }}-rest
+{{ include "labels.standard" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "hl-fabric.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      name: {{ include "hl-fabric.fullname" . }}-rest
+      labels:
+        name: {{ include "hl-fabric.fullname" . }}-rest
+{{ include "labels.standard" . | indent 8 }}
+    spec:
+      volumes:
+        - name: persistent-volume
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (include "hl-fabric.fullname" .) }}
+        {{- else }}
+          emptyDir: {}
+        {{- end }}
+      containers:
+        - name: rest-server
+          image: "{{ .Values.rest.image.repository }}:{{ .Values.rest.image.tag }}"
+          imagePullPolicy: {{ .Values.rest.image.pullPolicy }}
+          # TODO: Add liveness and readiness probes
+          env:
+            - name: fabric_CARD
+              value: {{ .Values.rest.config.fabricRestServerCard }}
+            - name: fabric_NAMESPACES
+              value: never
+          volumeMounts:
+            - name: persistent-volume
+              mountPath: /tmp/fabric/
+          resources:
+{{ toYaml .Values.rest.resources | indent 12 }}
+    {{- with .Values.rest.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.rest.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.rest.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+---
